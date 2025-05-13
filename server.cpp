@@ -3,14 +3,17 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-#include <winsock2.h>
-
-#pragma comment(lib, "ws2_32.lib")
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <cstring>
 
 using namespace std;
 
 const int PORT = 12345;
 const int BUFFER_SIZE = 1024;
+const int MAX_CONNECTIONS = 5;
 
 vector<string> security_tips = {
     "Используйте двухфакторную аутентификацию для всех важных аккаунтов.",
@@ -43,47 +46,37 @@ string process_command(const string& command) {
 }
 
 int main() {
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        cerr << "Ошибка инициализации Winsock" << endl;
-        return 1;
-    }
-
-    SOCKET server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_socket == INVALID_SOCKET) {
+    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
         cerr << "Ошибка создания сокета" << endl;
-        WSACleanup();
         return 1;
     }
 
     sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(PORT);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(server_socket, (sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
+    if (bind(server_socket, (sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         cerr << "Ошибка привязки сокета" << endl;
-        closesocket(server_socket);
-        WSACleanup();
+        close(server_socket);
         return 1;
     }
 
-    if (listen(server_socket, SOMAXCONN) == SOCKET_ERROR) {
+    if (listen(server_socket, MAX_CONNECTIONS) == -1) {
         cerr << "Ошибка прослушивания" << endl;
-        closesocket(server_socket);
-        WSACleanup();
+        close(server_socket);
         return 1;
     }
 
     cout << "Сервер запущен и ожидает подключений на порту " << PORT << endl;
 
     while (true) {
-        SOCKET client_socket;
         sockaddr_in client_addr;
-        int client_addr_size = sizeof(client_addr);
+        socklen_t client_addr_size = sizeof(client_addr);
 
-        client_socket = accept(server_socket, (sockaddr*)&client_addr, &client_addr_size);
-        if (client_socket == INVALID_SOCKET) {
+        int client_socket = accept(server_socket, (sockaddr*)&client_addr, &client_addr_size);
+        if (client_socket == -1) {
             cerr << "Ошибка принятия соединения" << endl;
             continue;
         }
@@ -99,10 +92,9 @@ int main() {
             send(client_socket, response.c_str(), response.size(), 0);
         }
 
-        closesocket(client_socket);
+        close(client_socket);
     }
 
-    closesocket(server_socket);
-    WSACleanup();
+    close(server_socket);
     return 0;
 }
