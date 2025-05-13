@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const string SERVER_IP = "127.0.0.1";
+const string SERVER_IP = "192.168.1.100";
 const int PORT = 12345;
 const int BUFFER_SIZE = 1024;
 
@@ -19,18 +19,18 @@ int main() {
 
     SOCKET client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client_socket == INVALID_SOCKET) {
-        cerr << "Ошибка создания сокета" << endl;
+        cerr << "Ошибка создания сокета: " << WSAGetLastError() << endl;
         WSACleanup();
         return 1;
     }
 
     sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP.c_str());
     server_addr.sin_port = htons(PORT);
+    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP.c_str());
 
     if (connect(client_socket, (sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
-        cerr << "Ошибка подключения к серверу" << endl;
+        cerr << "Ошибка подключения к серверу: " << WSAGetLastError() << endl;
         closesocket(client_socket);
         WSACleanup();
         return 1;
@@ -52,13 +52,22 @@ int main() {
             break;
         }
 
-        send(client_socket, command.c_str(), command.size(), 0);
+        if (send(client_socket, command.c_str(), command.size(), 0) == SOCKET_ERROR) {
+            cerr << "Ошибка отправки данных: " << WSAGetLastError() << endl;
+            break;
+        }
 
         char buffer[BUFFER_SIZE];
         int bytes_received = recv(client_socket, buffer, BUFFER_SIZE, 0);
         if (bytes_received > 0) {
             buffer[bytes_received] = '\0';
             cout << "Ответ сервера: " << buffer << endl;
+        } else if (bytes_received == 0) {
+            cout << "Сервер закрыл соединение" << endl;
+            break;
+        } else {
+            cerr << "Ошибка приема данных: " << WSAGetLastError() << endl;
+            break;
         }
     }
 
