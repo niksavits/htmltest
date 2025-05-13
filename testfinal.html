@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивный гид по кибербезопасности</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .quiz-option {
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .quiz-option:hover {
+            background: #e9ecef;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            background: white;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Интерактивный гид по кибербезопасности</h1>
+            <p>Проверьте свои знания и научитесь защищаться</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'tips')">Советы</button>
+            <button class="tablinks" onclick="openTab(event, 'quiz')">Тест</button>
+            <button class="tablinks" onclick="openTab(event, 'tools')">Инструменты</button>
+        </div>
+
+        <div id="tips" class="tabcontent" style="display: block;">
+            <div class="card">
+                <h2>Создание надежных паролей</h2>
+                <p>Попробуйте сгенерировать безопасный пароль:</p>
+                <div id="password-result" style="padding: 10px; background: #f8f9fa; border-radius: 5px; margin: 10px 0; font-family: monospace;"></div>
+                <button class="btn" onclick="generatePassword()">Сгенерировать пароль</button>
+            </div>
+
+            <div class="card">
+                <h2>Проверьте силу своего пароля</h2>
+                <input type="text" id="password-check" placeholder="Введите пароль" style="padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+                <div class="progress-container">
+                    <div id="password-strength" class="progress-bar"></div>
+                </div>
+                <p id="password-feedback"></p>
+            </div>
+
+            <div class="card">
+                <h2>Двухфакторная аутентификация</h2>
+                <p>Нажмите, чтобы увидеть, как работает 2FA:</p>
+                <button class="btn" onclick="show2FADemo()">Демонстрация 2FA</button>
+                <div id="2fa-demo" style="margin-top: 15px; display: none;">
+                    <img src="https://via.placeholder.com/200x100?text=2FA+Код:+123456" alt="2FA пример" style="border: 1px solid #ddd; border-radius: 4px;">
+                    <p>Код подтверждения: <strong>123456</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="quiz" class="tabcontent">
+            <div class="card">
+                <h2>Проверьте свои знания</h2>
+                <div id="quiz-container">
+                    <div class="quiz-question">
+                        <h3>1. Что такое фишинг?</h3>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">Мошенническая попытка получить личные данные через поддельные сайты</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">Вид компьютерного вируса</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">Способ шифрования данных</div>
+                    </div>
+
+                    <div class="quiz-question" style="margin-top: 20px;">
+                        <h3>2. Какой пароль самый безопасный?</h3>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">123456</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">qwerty</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">J8#kL92!mNx$</div>
+                    </div>
+
+                    <div class="quiz-question" style="margin-top: 20px;">
+                        <h3>3. Что нужно делать при получении письма от неизвестного отправителя с вложением?</h3>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">Открыть вложение из любопытства</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">Не открывать и удалить письмо</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">Переслать другу</div>
+                    </div>
+                </div>
+                <button class="btn" onclick="showQuizResults()" style="margin-top: 20px;">Показать результаты</button>
+                <div id="quiz-results" style="margin-top: 20px; font-weight: bold;"></div>
+            </div>
+        </div>
+
+        <div id="tools" class="tabcontent">
+            <div class="card">
+                <h2>Полезные инструменты безопасности</h2>
+                
+                <div style="margin-bottom: 15px;">
+                    <h3>Менеджеры паролей <span class="tooltip">(?)
+                        <span class="tooltiptext">Программы для безопасного хранения всех ваших паролей</span>
+                    </span></h3>
+                    <button class="btn" onclick="alert('Рекомендуем: Bitwarden (бесплатный), 1Password, LastPass')">Узнать больше</button>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h3>VPN сервисы <span class="tooltip">(?)
+                        <span class="tooltiptext">Защищают ваше интернет-соединение и скрывают местоположение</span>
+                    </span></h3>
+                    <button class="btn" onclick="alert('Лучшие варианты: ProtonVPN, NordVPN, Mullvad')">Узнать больше</button>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h3>Проверка утечек данных</h3>
+                    <button class="btn" onclick="window.open('https://haveibeenpwned.com/', '_blank')">Проверить на Have I Been Pwned</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Симулятор фишинговой атаки</h2>
+            <p>Попробуйте определить фишинговое письмо:</p>
+            <button class="btn" onclick="showPhishingEmail()">Показать пример письма</button>
+            <div id="phishing-email" style="margin-top: 15px; display: none; border: 1px solid #ddd; padding: 15px; background: #f9f9f9;">
+                <h3 style="margin-top: 0;">Ваш аккаунт был заблокирован!</h3>
+                <p>Уважаемый пользователь,</p>
+                <p>Мы обнаружили подозрительную активность в вашем аккаунте. Для разблокировки немедленно перейдите по ссылке и введите свои данные:</p>
+                <p><a href="#" style="color: #0066cc;">https://fake-bank-login.com</a></p>
+                <p>С уважением,<br>Служба безопасности</p>
+                <hr>
+                <p>Это письмо - пример фишинга! Настоящие сервисы никогда не просят вводить данные через ссылки в письмах.</p>
+                <button class="btn" onclick="hidePhishingEmail()" style="background: #e74c3c;">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        function generatePassword() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+            let password = "";
+            for (let i = 0; i < 16; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById("password-result").textContent = password;
+        }
+
+        document.getElementById("password-check").addEventListener("input", function() {
+            const password = this.value;
+            let strength = 0;
+            
+            if (password.length >= 8) strength += 1;
+            if (password.match(/[a-z]/)) strength += 1;
+            if (password.match(/[A-Z]/)) strength += 1;
+            if (password.match(/[0-9]/)) strength += 1;
+            if (password.match(/[^a-zA-Z0-9]/)) strength += 1;
+            
+            const strengthPercent = strength * 20;
+            const bar = document.getElementById("password-strength");
+            bar.style.width = strengthPercent + "%";
+            
+            if (strengthPercent < 40) {
+                bar.style.backgroundColor = "#e74c3c";
+                document.getElementById("password-feedback").textContent = "Слабый пароль";
+            } else if (strengthPercent < 70) {
+                bar.style.backgroundColor = "#f39c12";
+                document.getElementById("password-feedback").textContent = "Средний пароль";
+            } else {
+                bar.style.backgroundColor = "#2ecc71";
+                document.getElementById("password-feedback").textContent = "Сильный пароль!";
+            }
+        });
+
+        function show2FADemo() {
+            document.getElementById("2fa-demo").style.display = "block";
+        }
+
+        function showPhishingEmail() {
+            document.getElementById("phishing-email").style.display = "block";
+        }
+        function hidePhishingEmail() {
+            document.getElementById("phishing-email").style.display = "none";
+        }
+
+        let correctAnswers = 0;
+        function checkAnswer(element, isCorrect) {
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.style.backgroundColor = '#f8f9fa';
+            });
+            
+            if (isCorrect) {
+                element.style.backgroundColor = '#2ecc71';
+                correctAnswers++;
+            } else {
+                element.style.backgroundColor = '#e74c3c';
+            }
+            
+            options.forEach(opt => {
+                opt.onclick = null;
+                opt.style.cursor = 'default';
+            });
+        }
+
+        function showQuizResults() {
+            const totalQuestions = document.querySelectorAll('.quiz-question').length;
+            document.getElementById('quiz-results').innerHTML = 
+                `Вы ответили правильно на ${correctAnswers} из ${totalQuestions} вопросов!`;
+        }
+
+        function openTab(evt, tabName) {
+            const tabcontent = document.getElementsByClassName("tabcontent");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            
+            const tablinks = document.getElementsByClassName("tablinks");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>
